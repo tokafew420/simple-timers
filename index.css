@@ -18,9 +18,8 @@ body {
   background-color: #0b1d36;
 }
 
-.category-container,
-.question-container {
-  padding: 2px;
+hr {
+  border-top: 1px solid #dddddd;
 }
 
 .card {
@@ -133,8 +132,6 @@ body {
     min-width: unset;
   }
 }
-
-
 
 @keyframes timer-danger {
   0% {

@@ -68,6 +68,7 @@
                 .map((timer) => {
                     return {
                         endTime: timer.endTime.getTime(),
+                        name: timer.name,
                         minBefore: timer.minBefore
                     };
                 })
@@ -119,10 +120,14 @@
 
     const createTimerCard = (timer) => {
         const $card = $cardTmpl.clone();
+        if (timer.name) {
+            $('.timer-name', $card).text(timer.name).removeClass('d-none');
+        }
         $('.timer-until', $card).text(moment(timer.endTime).format('hh:mm A'));
 
         $card.appendTo($timers);
         timer.$card = $card;
+        timer.$name = $('.timer-until', $card);
         timer.$left = $('.timer-left', $card);
         timer.$timeLeft = $('.timer-time-left', $card);
         $card.data('timer', timer);
@@ -154,8 +159,11 @@
     const $newTimerHour = $('#new-timer-hour-input', $newTimerDlg);
     const $newTimerMin = $('#new-timer-minute-input', $newTimerDlg);
     const $newTimerSec = $('#new-timer-second-input', $newTimerDlg);
+    const $newTimerName = $('#new-timer-name-input', $newTimerDlg);
     const $newTimerMinBefore = $('#new-timer-minutes-before-input', $newTimerDlg);
     const $newTimerAddBtn = $('#new-timer-add-btn', $newTimerDlg);
+
+    $newTimerMinBefore.val(opts.minBefore);
 
     $newTimerDlg.modal({
         backdrop: 'static',
@@ -163,20 +171,24 @@
         focus: true,
         show: false
     }).on('show.bs.modal', () => {
-        $newTimerHour.setValidity().val('');
-        $newTimerMin.setValidity().val('');
-        $newTimerSec.setValidity().val('');
-        $newTimerMinBefore.val(opts.minBefore);
+        $newTimerHour.setValidity();
+        $newTimerMin.setValidity();
+        $newTimerSec.setValidity();
+        $newTimerName.setValidity().val('');
+        $newTimerMinBefore.setValidity();
     });
 
     $newTimerAddBtn.on('click', () => {
         const hours = +$newTimerHour.setValidity().val();
         const minutes = +$newTimerMin.setValidity().val();
         const seconds = +$newTimerSec.setValidity().val();
+        const name = ($newTimerName.setValidity().val() || '').trim();
+        const minBefore = +$newTimerMinBefore.setValidity().val();
 
         if (isNaN(hours)) $newTimerHour.setValidity(false);
         if (isNaN(minutes)) $newTimerMin.setValidity(false);
         if (isNaN(seconds)) $newTimerSec.setValidity(false);
+        if (isNaN(minBefore)) $newTimerMinBefore.setValidity(false);
 
         if ($('.is-invalid', $newTimerDlg).length) return;
 
@@ -187,7 +199,8 @@
 
         const timer = {
             endTime: later,
-            minBefore: +$newTimerMinBefore.val() || 0
+            name: name,
+            minBefore: minBefore
         };
         timers.push(timer);
         createTimerCard(timer);
@@ -200,7 +213,8 @@
     const $newAlarmInvalidFeedback = $('.invalid-time', $newAlarmDlg);
     const $newAlarmHour = $('#new-alarm-hour-input', $newAlarmDlg);
     const $newAlarmMin = $('#new-alarm-minute-input', $newAlarmDlg);
-    const $newAlarmTt = $('#time-tt-lbl', $newAlarmDlg);
+    const $newAlarmTt = $('#new-alarm-tt-lbl', $newAlarmDlg);
+    const $newAlarmName = $('#new-alarm-name-input', $newAlarmDlg);
     const $newAlarmMinBefore = $('#new-alarm-minutes-before-input', $newAlarmDlg);
     const $newAlarmAddBtn = $('#new-alarm-add-btn', $newAlarmDlg);
 
@@ -212,6 +226,8 @@
 
         return later;
     };
+
+    $newAlarmMinBefore.val(opts.minBefore);
 
     $newAlarmDlg.modal({
         backdrop: 'static',
@@ -233,7 +249,6 @@
         $newAlarmHour.val($('option', $newAlarmHour).eq(0).val());
         $newAlarmMin.val(now.getMinutes() + 1);
         $newAlarmTt.text(moment().format('A'));
-        $newAlarmMinBefore.val(opts.minBefore);
     });
 
     $newAlarmHour.add($newAlarmMin).on('change', () => {
@@ -246,11 +261,18 @@
         $newAlarmInvalidFeedback.hide();
         const now = new Date();
         const later = getNewAlarmTime();
+        const name = ($newAlarmName.setValidity().val() || '').trim();
+        const minBefore = +$newAlarmMinBefore.setValidity().val();
+
+        if (isNaN(minBefore)) $newAlarmMinBefore.setValidity(false);
+
+        if ($('.is-invalid', $newTimerDlg).length) return;
 
         if (later > now) {
             const timer = {
                 endTime: later,
-                minBefore: +$newAlarmMinBefore.val() || 0
+                name: name,
+                minBefore: minBefore
             };
             timers.push(timer);
             createTimerCard(timer);
@@ -280,7 +302,7 @@
     let buzzerChanged = false;
 
     const setBuzzerSound = (buzzer) => {
-        $('source', sounds.$buzzer).attr('src', buzzer.src);
+        sounds.$buzzer.attr('src', buzzer.src);
         sounds.$buzzer[0].load();
         $('label[for="buzzer-sound-file-input"]', $settingsDlg).text(buzzer.name);
     };
@@ -290,6 +312,8 @@
     $buzzerFileInput.on('change', async () => {
         const file = $buzzerFileInput[0].files[0];
         if (file) {
+            $('label[for="buzzer-sound-file-input"]', $settingsDlg).text(file.name);
+
             const result = await toBase64(file).catch(e => Error(e));
             if (result instanceof Error) {
                 console.error('Buzzer input file error: ', result.message);
@@ -334,6 +358,7 @@
         timers = data.timers.map((timer) => {
             return {
                 endTime: new Date(timer.endTime),
+                name: timer.name,
                 minBefore: timer.minBefore
             };
         }).filter((timer) => timer.endTime >= now);
