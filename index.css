@@ -1,11 +1,13 @@
 html,
 body {
   font-family: "Roboto", Arial, Helvetica, sans-serif;
+  height: 100%;
 }
 
 body {
-  padding-top: 54px;
   background-color: #ffffff;
+  background-size: cover;
+  padding-top: 54px;
 }
 
 @media (min-width: 992px) {
@@ -16,6 +18,12 @@ body {
 
 .navbar {
   background-color: #0b1d36;
+}
+
+.page {
+  height: 100%;
+  overflow: hidden;
+  overflow-y: auto;
 }
 
 hr {
@@ -93,6 +101,11 @@ hr {
   margin: 0 auto;
   -webkit-animation: spin .75s linear infinite;
   animation: spin .75s linear infinite;
+}
+
+.now-card:hover,
+.timer-remove:hover {
+  cursor: pointer;
 }
 
 .timer-danger .card-body,

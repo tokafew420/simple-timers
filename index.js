@@ -1,6 +1,7 @@
 (function (window) {
     /** Vars */
     const opts = {
+        background: true,
         sound: true,
         minBefore: 5
     };
@@ -49,6 +50,14 @@
         reader.onerror = error => reject(error);
     });
 
+    const getViewportSize = () => {
+        const $window = $(window);
+        return {
+            h: $window.height(),
+            w: $window.width()
+        };
+    };
+
     $.fn.setValidity = function (isValid, message) {
         return this.each(function () {
             const $this = $(this);
@@ -91,6 +100,25 @@
         if (sec < 120) return 1;
         return 0;
     };
+
+    /** Global **/
+    const $attribution = $('#attribution');
+    const $photographer = $('.photographer', $attribution);
+    const $changeBackgroundBtn = $('#change-background-btn', $attribution);
+
+    const setBackground = () => {
+        if (opts.background) {
+            const viewport = getViewportSize();
+            $.getJSON(`https://api.unsplash.com/photos/random?client_id=Xy8zbnyDJZR1I8xv5m8p_G5khxSdCmGfMgZsZu8A2rA&query=nature,water`, function (res, status, xhr) {
+                $photographer.text(res.user.name);
+                $('body').css('background-image', `url(${res.urls.regular})`);
+            });
+        } else {
+            $('body').css('background-image', 'none');
+        }
+    };
+
+    $changeBackgroundBtn.on('click', () => setBackground());
 
     /** Loader **/
     const $loader = $('.loader-container');
@@ -297,6 +325,8 @@
     /** Settings **/
     const $settingsDlg = $('#settings-modal');
     const $buzzerFileInput = $('#buzzer-sound-file-input', $settingsDlg);
+    const $enableSound = $('#enable-sound', $settingsDlg);
+    const $enableBgImage = $('#enable-background-image', $settingsDlg);
     const $settingsSaveBtn = $('#settings-save-btn', $settingsDlg);
     let buzzer = {};
     let buzzerChanged = false;
@@ -307,7 +337,11 @@
         $('label[for="buzzer-sound-file-input"]', $settingsDlg).text(buzzer.name);
     };
 
-    $settingsDlg.on('show.bs.modal', () => $('label[for="buzzer-sound-file-input"]', $settingsDlg).text(buzzer && buzzer.name || 'Choose file'));
+    $settingsDlg.on('show.bs.modal', () => {
+        $('label[for="buzzer-sound-file-input"]', $settingsDlg).text(buzzer && buzzer.name || 'Choose file');
+        $enableBgImage.prop('checked', opts.background);
+        $enableSound.prop('checked', opts.sound);
+    });
 
     $buzzerFileInput.on('change', async () => {
         const file = $buzzerFileInput[0].files[0];
@@ -334,6 +368,22 @@
             setBuzzerSound(buzzer);
             buzzerChanged = false;
         }
+
+        opts.sound = $enableSound.is(':checked');
+        if (!opts.sound) {
+            sounds.stopLoop();
+        } else if (loopMs) {
+            sounds.startLoop(sounds.$tick, loopMs);
+        }
+
+        const backgroud = $enableBgImage.is(':checked');
+        if (opts.background !== backgroud) {
+            opts.background = backgroud;
+            setBackground();
+            $attribution.toggle(opts.background);
+        }
+        window.localStorage.setItem('simple-timers.opts', JSON.stringify(opts));
+
         $settingsDlg.modal('hide');
     });
 
@@ -350,10 +400,18 @@
         }
     };
 
-    rehydrate('simple-timers.timers', (data) => {
-        opts.sound = opts.sound;
-        opts.minBefore = opts.minBefore;
+    rehydrate('simple-timers.opts', (data) => {
+        opts.background = data.background;
+        opts.sound = data.sound;
+        opts.minBefore = data.minBefore;
+    });
 
+    if (opts.background) {
+        $(() => setBackground());
+    }
+    $attribution.toggle(opts.background);
+
+    rehydrate('simple-timers.timers', (data) => {
         const now = new Date();
         timers = data.timers.map((timer) => {
             return {

@@ -48,11 +48,11 @@
             </div>
         </div>
     </nav>
-    <!-- Header -->
-    <div class="container now-container">
-        <div class="row my-2">
-            <div class="col">
-                <a href="#">
+    <div class="page">
+        <!-- Header -->
+        <div class="container now-container">
+            <div class="row my-2">
+                <div class="col">
                     <div class="card now-card">
                         <div class="card-body">
                             <div class="container">
@@ -69,307 +69,340 @@
                             </div>
                         </div>
                     </div>
-                </a>
+                </div>
             </div>
         </div>
-    </div>
-    <!-- Timers -->
-    <div class="container">
-        <h1 class="my-4 mx-2">Timers</h1>
-        <div class="timers">
-        </div>
-        <div class="row pb-5 pt-3">
-            <div class="col-12 col-sm-6 mb-2">
-                <div class="btn btn-success btn-lg btn-block" data-toggle="modal" data-target="#new-timer-modal"><i class="far fa-stopwatch fa-fw"></i>&nbsp;New Timer</div>
+        <!-- Timers -->
+        <div class="container">
+            <h1 class="my-4 mx-2">
+                <div class="alert alert-light" role="alert">
+                    Timers
+                </div>
+            </h1>
+            <div class="timers">
             </div>
-            <div class="col-12 col-sm-6 mb-2">
-                <div class="btn btn-success btn-lg btn-block" data-toggle="modal" data-target="#new-alarm-modal"><i class="far fa-alarm-clock fa-fw"></i>&nbsp;New Alarm</div>
+            <div class="row py-3">
+                <div class="col-12 col-sm-6 mb-2">
+                    <div class="btn btn-success btn-lg btn-block" data-toggle="modal" data-target="#new-timer-modal"><i class="far fa-stopwatch fa-fw"></i>&nbsp;New Timer</div>
+                </div>
+                <div class="col-12 col-sm-6 mb-2">
+                    <div class="btn btn-success btn-lg btn-block" data-toggle="modal" data-target="#new-alarm-modal"><i class="far fa-alarm-clock fa-fw"></i>&nbsp;New Alarm</div>
+                </div>
+            </div>
+            <hr />
+            <div class="row pb-5">
+                <div class="col">
+                    <div id="attribution">
+                        <span class="alert alert-light">Photo by <span class="photographer"></span> on <a href="https://unsplash.com/" target="_blank">Unsplash</a></span>
+                        <button type="button" id="change-background-btn" class="btn btn-sm btn-primary">Change Background</button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="d-none" id="timer-card-template">
-        <div class="row my-3 timer-row">
-            <div class="col timer-container">
-                <div class="card timer-card">
-                    <div class="card-body d-flex">
+        <div class="d-none" id="timer-card-template">
+            <div class="row my-3 timer-row">
+                <div class="col timer-container">
+                    <div class="card timer-card">
+                        <div class="card-body d-flex">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="title timer-name d-none"></div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 col-sm-6">
+                                        <div class="title timer-until"></div>
+                                    </div>
+                                    <div class="col-12 col-sm-6 text-sm-right">
+                                        <div class="title timer-left ml-auto">Left: <span class="timer-time-left">00:00:00</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="card-badge timer-remove">X</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- New timer dialog -->
+        <div class="modal fade" id="new-timer-modal" tabindex="-1" role="dialog" aria-labelledby="new-timer-modal-title" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="new-timer-modal-title">New Timer</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true"><i class="fas fa-times text-light"></i></span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
                         <div class="container">
                             <div class="row">
                                 <div class="col">
-                                    <div class="title timer-name d-none"></div>
+                                    <h5>Enter the time from now</h5>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-12 col-sm-6">
-                                    <div class="title timer-until"></div>
+                                <div class="col-12 col-lg-4">
+                                    <div class="form-group">
+                                        <div class="input-group input-group-lg">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="new-timer-hour-input-lbl">Hours</span>
+                                            </div>
+                                            <input type="number" id="new-timer-hour-input" class="form-control" aria-label="Hours" aria-describedby="new-timer-hour-input-lbl" min="0" />
+                                        </div>
+                                        <div class="invalid-feedback">Invalid</div>
+                                    </div>
                                 </div>
-                                <div class="col-12 col-sm-6 text-sm-right">
-                                    <div class="title timer-left ml-auto">Left: <span class="timer-time-left">00:00:00</span></div>
+                                <div class="col-12 col-lg-4">
+                                    <div class="form-group">
+                                        <div class="input-group input-group-lg">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="new-timer-hour-input-lbl">Minutes</span>
+                                            </div>
+                                            <input type="number" id="new-timer-minute-input" class="form-control" aria-label="Minutes" aria-describedby="new-timer-minute-input-lbl" min="0" />
+                                        </div>
+                                        <div class="invalid-feedback">Invalid</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-4">
+                                    <div class="form-group">
+                                        <div class="input-group input-group-lg">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="new-timer-second-input-lbl">Seconds</span>
+                                            </div>
+                                            <input type="number" id="new-timer-second-input" class="form-control" aria-label="Seconds" aria-describedby="new-timer-second-input-lbl" min="0" />
+                                        </div>
+                                        <div class="invalid-feedback">Invalid</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="new-timer-name-lbl" style="min-width: 136px;">Name</span>
+                                            </div>
+                                            <input type="text" id="new-timer-name-input" class="form-control" aria-label="Name" aria-describedby="new-timer-name-lbl" />
+                                        </div>
+                                        <div class="invalid-feedback">Invalid</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="new-timer-minutes-before-lbl" style="min-width: 136px;">Minutes Before</span>
+                                            </div>
+                                            <input type="number" id="new-timer-minutes-before-input" class="form-control" aria-label="Minutes Before" aria-describedby="new-timer-minutes-before-lbl" min="0" />
+                                        </div>
+                                        <div class="invalid-feedback">Invalid</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <span class="card-badge timer-remove">X</span>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="new-timer-add-btn" class="btn btn-outline-success">Add</button>
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- New timer dialog -->
-    <div class="modal fade" id="new-timer-modal" tabindex="-1" role="dialog" aria-labelledby="new-timer-modal-title" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="new-timer-modal-title">New Timer</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true"><i class="fas fa-times text-light"></i></span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col">
-                                <h5>Enter the time from now</h5>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12 col-lg-4">
-                                <div class="form-group">
-                                    <div class="input-group input-group-lg">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text" id="new-timer-hour-input-lbl">Hours</span>
-                                        </div>
-                                        <input type="number" id="new-timer-hour-input" class="form-control" aria-label="Hours" aria-describedby="new-timer-hour-input-lbl" min="0" />
-                                    </div>
-                                    <div class="invalid-feedback">Invalid</div>
+        <!-- New alarm dialog -->
+        <div class="modal fade" id="new-alarm-modal" tabindex="-1" role="dialog" aria-labelledby="new-alarm-modal-title" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="new-alarm-modal-title">New Alarm</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true"><i class="fas fa-times text-light"></i></span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col">
+                                    <h5>Pick a Time</h5>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-4">
-                                <div class="form-group">
-                                    <div class="input-group input-group-lg">
+                            <div class="row">
+                                <div class="col">
+                                    <span class="invalid-time text-danger">Pick a later time.</span>
+                                    <div class="input-group input-group-lg mb-3">
                                         <div class="input-group-prepend">
-                                            <span class="input-group-text" id="new-timer-hour-input-lbl">Minutes</span>
+                                            <span class="input-group-text" id="new-alarm-time-lbl">Time</span>
                                         </div>
-                                        <input type="number" id="new-timer-minute-input" class="form-control" aria-label="Minutes" aria-describedby="new-timer-minute-input-lbl" min="0" />
+                                        <select id="new-alarm-hour-input" class="custom-select custom-select-lg form-control" aria-label="Hour" aria-describedby="new-alarm-time-lbl">
+                                        </select>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">:</span>
+                                        </div>
+                                        <select id="new-alarm-minute-input" class="custom-select custom-select-lg form-control" aria-label="Minute" aria-describedby="new-alarm-time-lbl">
+                                            <option value="0">00</option>
+                                            <option value="1">01</option>
+                                            <option value="2">02</option>
+                                            <option value="3">03</option>
+                                            <option value="4">04</option>
+                                            <option value="5">05</option>
+                                            <option value="6">06</option>
+                                            <option value="7">07</option>
+                                            <option value="8">08</option>
+                                            <option value="9">09</option>
+                                            <option value="10">10</option>
+                                            <option value="11">11</option>
+                                            <option value="12">12</option>
+                                            <option value="13">13</option>
+                                            <option value="14">14</option>
+                                            <option value="15">15</option>
+                                            <option value="16">16</option>
+                                            <option value="17">17</option>
+                                            <option value="18">18</option>
+                                            <option value="19">19</option>
+                                            <option value="20">20</option>
+                                            <option value="21">21</option>
+                                            <option value="22">22</option>
+                                            <option value="23">23</option>
+                                            <option value="24">24</option>
+                                            <option value="25">25</option>
+                                            <option value="26">26</option>
+                                            <option value="27">27</option>
+                                            <option value="28">28</option>
+                                            <option value="29">29</option>
+                                            <option value="30">30</option>
+                                            <option value="31">31</option>
+                                            <option value="32">32</option>
+                                            <option value="33">33</option>
+                                            <option value="34">34</option>
+                                            <option value="35">35</option>
+                                            <option value="36">36</option>
+                                            <option value="37">37</option>
+                                            <option value="38">38</option>
+                                            <option value="39">39</option>
+                                            <option value="40">40</option>
+                                            <option value="41">41</option>
+                                            <option value="42">42</option>
+                                            <option value="43">43</option>
+                                            <option value="44">44</option>
+                                            <option value="45">45</option>
+                                            <option value="46">46</option>
+                                            <option value="47">47</option>
+                                            <option value="48">48</option>
+                                            <option value="49">49</option>
+                                            <option value="50">50</option>
+                                            <option value="51">51</option>
+                                            <option value="52">52</option>
+                                            <option value="53">53</option>
+                                            <option value="54">54</option>
+                                            <option value="55">55</option>
+                                            <option value="56">56</option>
+                                            <option value="57">57</option>
+                                            <option value="58">58</option>
+                                            <option value="59">59</option>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <span id="new-alarm-tt-lbl" class="input-group-text">AM</span>
+                                        </div>
                                     </div>
-                                    <div class="invalid-feedback">Invalid</div>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-4">
-                                <div class="form-group">
-                                    <div class="input-group input-group-lg">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text" id="new-timer-second-input-lbl">Seconds</span>
+                            <hr />
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="new-alarm-name-lbl" style="min-width: 136px;">Name</span>
+                                            </div>
+                                            <input type="text" id="new-alarm-name-input" class="form-control" aria-label="Name" aria-describedby="new-alarm-name-lbl" />
                                         </div>
-                                        <input type="number" id="new-timer-second-input" class="form-control" aria-label="Seconds" aria-describedby="new-timer-second-input-lbl" min="0" />
+                                        <div class="invalid-feedback">Invalid</div>
                                     </div>
-                                    <div class="invalid-feedback">Invalid</div>
                                 </div>
                             </div>
-                        </div>
-                        <hr />
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group">
+                            <div class="row">
+                                <div class="col">
                                     <div class="input-group mb-3">
                                         <div class="input-group-prepend">
-                                            <span class="input-group-text" id="new-timer-name-lbl" style="min-width: 136px;">Name</span>
+                                            <span class="input-group-text" id="new-alarm-minutes-before-lbl" style="min-width: 136px;">Minutes Before</span>
                                         </div>
-                                        <input type="text" id="new-timer-name-input" class="form-control" aria-label="Name" aria-describedby="new-timer-name-lbl" />
+                                        <input type="number" id="new-alarm-minutes-before-input" class="form-control" aria-label="Minutes Before" aria-describedby="new-alarm-minutes-before-lbl" min="0" />
                                     </div>
-                                    <div class="invalid-feedback">Invalid</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group">
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text" id="new-timer-minutes-before-lbl" style="min-width: 136px;">Minutes Before</span>
-                                        </div>
-                                        <input type="number" id="new-timer-minutes-before-input" class="form-control" aria-label="Minutes Before" aria-describedby="new-timer-minutes-before-lbl" min="0" />
-                                    </div>
-                                    <div class="invalid-feedback">Invalid</div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="new-timer-add-btn" class="btn btn-outline-success">Add</button>
-                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                    <div class="modal-footer">
+                        <button type="button" id="new-alarm-add-btn" class="btn btn-outline-success">Add</button>
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- New alarm dialog -->
-    <div class="modal fade" id="new-alarm-modal" tabindex="-1" role="dialog" aria-labelledby="new-alarm-modal-title" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="new-alarm-modal-title">New Alarm</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true"><i class="fas fa-times text-light"></i></span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col">
-                                <h5>Pick a Time</h5>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <span class="invalid-time text-danger">Pick a later time.</span>
-                                <div class="input-group input-group-lg mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text" id="new-alarm-time-lbl">Time</span>
-                                    </div>
-                                    <select id="new-alarm-hour-input" class="custom-select custom-select-lg form-control" aria-label="Hour" aria-describedby="new-alarm-time-lbl">
-                                    </select>
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">:</span>
-                                    </div>
-                                    <select id="new-alarm-minute-input" class="custom-select custom-select-lg form-control" aria-label="Minute" aria-describedby="new-alarm-time-lbl">
-                                        <option value="0">00</option>
-                                        <option value="1">01</option>
-                                        <option value="2">02</option>
-                                        <option value="3">03</option>
-                                        <option value="4">04</option>
-                                        <option value="5">05</option>
-                                        <option value="6">06</option>
-                                        <option value="7">07</option>
-                                        <option value="8">08</option>
-                                        <option value="9">09</option>
-                                        <option value="10">10</option>
-                                        <option value="11">11</option>
-                                        <option value="12">12</option>
-                                        <option value="13">13</option>
-                                        <option value="14">14</option>
-                                        <option value="15">15</option>
-                                        <option value="16">16</option>
-                                        <option value="17">17</option>
-                                        <option value="18">18</option>
-                                        <option value="19">19</option>
-                                        <option value="20">20</option>
-                                        <option value="21">21</option>
-                                        <option value="22">22</option>
-                                        <option value="23">23</option>
-                                        <option value="24">24</option>
-                                        <option value="25">25</option>
-                                        <option value="26">26</option>
-                                        <option value="27">27</option>
-                                        <option value="28">28</option>
-                                        <option value="29">29</option>
-                                        <option value="30">30</option>
-                                        <option value="31">31</option>
-                                        <option value="32">32</option>
-                                        <option value="33">33</option>
-                                        <option value="34">34</option>
-                                        <option value="35">35</option>
-                                        <option value="36">36</option>
-                                        <option value="37">37</option>
-                                        <option value="38">38</option>
-                                        <option value="39">39</option>
-                                        <option value="40">40</option>
-                                        <option value="41">41</option>
-                                        <option value="42">42</option>
-                                        <option value="43">43</option>
-                                        <option value="44">44</option>
-                                        <option value="45">45</option>
-                                        <option value="46">46</option>
-                                        <option value="47">47</option>
-                                        <option value="48">48</option>
-                                        <option value="49">49</option>
-                                        <option value="50">50</option>
-                                        <option value="51">51</option>
-                                        <option value="52">52</option>
-                                        <option value="53">53</option>
-                                        <option value="54">54</option>
-                                        <option value="55">55</option>
-                                        <option value="56">56</option>
-                                        <option value="57">57</option>
-                                        <option value="58">58</option>
-                                        <option value="59">59</option>
-                                    </select>
-                                    <div class="input-group-append">
-                                        <span id="new-alarm-tt-lbl" class="input-group-text">AM</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <hr />
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group">
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text" id="new-alarm-name-lbl" style="min-width: 136px;">Name</span>
+        <!-- Settings dialog -->
+        <div class="modal fade" id="settings-modal" tabindex="-1" role="dialog" aria-labelledby="settings-modal-title" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="settings-modal-title">Settings</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true"><i class="fas fa-times text-light"></i></span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label>Choose a custom sound for the buzzer</label>
+                                        <div class="input-group">
+                                            <div class="custom-file">
+                                                <input type="file" class="custom-file-input" id="buzzer-sound-file-input" accept="audio/wav, audio/mpeg, audio/mp4, audio/aac, audio/aacp, audio/ogg, audio/webm, audio/flac" />
+                                                <label class="custom-file-label" for="buzzer-sound-file-input">Choose file</label>
+                                            </div>
                                         </div>
-                                        <input type="text" id="new-alarm-name-input" class="form-control" aria-label="Name" aria-describedby="new-alarm-name-lbl" />
+                                        <div class="invalid-feedback">Invalid</div>
                                     </div>
-                                    <div class="invalid-feedback">Invalid</div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text" id="new-alarm-minutes-before-lbl" style="min-width: 136px;">Minutes Before</span>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="enable-sound">
+                                            <label class="custom-control-label" for="enable-sound">Enable sounds</label>
+                                        </div>
                                     </div>
-                                    <input type="number" id="new-alarm-minutes-before-input" class="form-control" aria-label="Minutes Before" aria-describedby="new-alarm-minutes-before-lbl" min="0" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="enable-background-image">
+                                            <label class="custom-control-label" for="enable-background-image">Use background images</label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" id="new-alarm-add-btn" class="btn btn-outline-success">Add</button>
-                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Settings dialog -->
-    <div class="modal fade" id="settings-modal" tabindex="-1" role="dialog" aria-labelledby="settings-modal-title" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="settings-modal-title">Settings</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true"><i class="fas fa-times text-light"></i></span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group">
-                                    <label>Choose a custom sound for the buzzer</label>
-                                    <div class="input-group">
-                                        <div class="custom-file">
-                                            <input type="file" class="custom-file-input" id="buzzer-sound-file-input" accept="audio/wav, audio/mpeg, audio/mp4, audio/aac, audio/aacp, audio/ogg, audio/webm, audio/flac" />
-                                            <label class="custom-file-label" for="buzzer-sound-file-input">Choose file</label>
-                                        </div>
-                                    </div>
-                                    <div class="invalid-feedback">Invalid</div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="modal-footer">
+                        <button type="button" id="settings-save-btn" class="btn btn-outline-success">Save</button>
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" id="settings-save-btn" class="btn btn-outline-success">Save</button>
-                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
-                </div>
             </div>
         </div>
-    </div>
-    <!-- Loader -->
-    <div class="loader-container">
-        <div class="loader"></div>
-        <div class="msg"></div>
+        <!-- Loader -->
+        <div class="loader-container">
+            <div class="loader"></div>
+            <div class="msg"></div>
+        </div>
     </div>
     <!-- Sounds -->
     <audio id="audio-blop" src="./sounds/blop.mp3" preload="auto"></audio>
@@ -378,7 +411,7 @@
     <audio id="audio-buzzer" src="./sounds/air-horn.mp3" preload="auto"></audio>
     <audio id="audio-break" src="./sounds/break.mp3" preload="auto"></audio>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js" integrity="sha512-rmZcZsyhe0/MAjquhTgiUcb4d9knaFc7b5xAfju483gbEXTkeJRUMIPk6s3ySZMYUHEcjKbjLjyddGWMrNEvZg==" crossorigin="anonymous"></script>
