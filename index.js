@@ -2,6 +2,7 @@
     /** Vars */
     const opts = {
         background: true,
+        rotateBg: true,
         sound: true,
         minBefore: 5
     };
@@ -69,10 +70,13 @@
         });
     };
 
+    const saveLocal = (key, obj) => {
+        window.localStorage.setItem('simple-timers.' + key, JSON.stringify(obj));
+    };
+
     const saveTimers = () => {
         const now = new Date();
-        window.localStorage.setItem('simple-timers.timers', JSON.stringify({
-            opts: opts,
+        saveLocal('timers', {
             timers: timers.filter((timer) => timer.endTime >= now)
                 .map((timer) => {
                     return {
@@ -81,7 +85,7 @@
                         minBefore: timer.minBefore
                     };
                 })
-        }));
+        });
     }
 
     const getLoopInterval = (sec) => {
@@ -105,20 +109,39 @@
     const $attribution = $('#attribution');
     const $photographer = $('.photographer', $attribution);
     const $changeBackgroundBtn = $('#change-background-btn', $attribution);
+    let bg = {};
 
     const setBackground = () => {
         if (opts.background) {
-            const viewport = getViewportSize();
-            $.getJSON(`https://api.unsplash.com/photos/random?client_id=Xy8zbnyDJZR1I8xv5m8p_G5khxSdCmGfMgZsZu8A2rA&query=nature,water`, function (res, status, xhr) {
-                $photographer.text(res.user.name);
-                $('body').css('background-image', `url(${res.urls.regular})`);
-            });
+            if (bg.name && bg.url) {
+                $photographer.text(bg.name);
+                $('body').css('background-image', `url(${bg.url})`);
+            } else {
+                const viewport = getViewportSize();
+                $.getJSON(`https://api.unsplash.com/photos/random?client_id=Xy8zbnyDJZR1I8xv5m8p_G5khxSdCmGfMgZsZu8A2rA&query=nature,water`, function (res, status, xhr) {
+                    if (res && res.user && res.urls) {
+                        bg.name = res.user.name;
+                        bg.url = res.urls.regular;
+                        bg.date = moment().format('YYYYMMDD');
+
+                        if (bg.name && bg.url) {
+                            $photographer.text(bg.name);
+                            $('body').css('background-image', `url(${bg.url})`);
+                            saveLocal('background', bg);
+                        }
+                    }
+                });
+            }
         } else {
             $('body').css('background-image', 'none');
         }
     };
 
-    $changeBackgroundBtn.on('click', () => setBackground());
+    $changeBackgroundBtn.on('click', (e) => {
+        e.preventDefault();
+        bg = {};
+        setBackground();
+    });
 
     /** Loader **/
     const $loader = $('.loader-container');
@@ -184,6 +207,7 @@
 
     /** New timer **/
     const $newTimerDlg = $('#new-timer-modal');
+    const $newTimerInvalidFeedback = $('.invalid-time', $newTimerDlg);
     const $newTimerHour = $('#new-timer-hour-input', $newTimerDlg);
     const $newTimerMin = $('#new-timer-minute-input', $newTimerDlg);
     const $newTimerSec = $('#new-timer-second-input', $newTimerDlg);
@@ -199,6 +223,7 @@
         focus: true,
         show: false
     }).on('show.bs.modal', () => {
+        $newTimerInvalidFeedback.hide();
         $newTimerHour.setValidity();
         $newTimerMin.setValidity();
         $newTimerSec.setValidity();
@@ -207,6 +232,7 @@
     });
 
     $newTimerAddBtn.on('click', () => {
+        $newTimerInvalidFeedback.hide();
         const hours = +$newTimerHour.setValidity().val();
         const minutes = +$newTimerMin.setValidity().val();
         const seconds = +$newTimerSec.setValidity().val();
@@ -220,6 +246,10 @@
 
         if ($('.is-invalid', $newTimerDlg).length) return;
 
+        if (!hours && !minutes && !seconds) {
+            $newTimerInvalidFeedback.show();
+            return;
+        }
         const later = new Date();
         later.setHours(later.getHours() + hours);
         later.setMinutes(later.getMinutes() + minutes)
@@ -277,6 +307,7 @@
         $newAlarmHour.val($('option', $newAlarmHour).eq(0).val());
         $newAlarmMin.val(now.getMinutes() + 1);
         $newAlarmTt.text(moment().format('A'));
+        $newAlarmName.setValidity().val('');
     });
 
     $newAlarmHour.add($newAlarmMin).on('change', () => {
@@ -327,6 +358,7 @@
     const $buzzerFileInput = $('#buzzer-sound-file-input', $settingsDlg);
     const $enableSound = $('#enable-sound', $settingsDlg);
     const $enableBgImage = $('#enable-background-image', $settingsDlg);
+    const $rotateBgImage = $('#rotate-background-image', $settingsDlg);
     const $settingsSaveBtn = $('#settings-save-btn', $settingsDlg);
     let buzzer = {};
     let buzzerChanged = false;
@@ -340,6 +372,7 @@
     $settingsDlg.on('show.bs.modal', () => {
         $('label[for="buzzer-sound-file-input"]', $settingsDlg).text(buzzer && buzzer.name || 'Choose file');
         $enableBgImage.prop('checked', opts.background);
+        $rotateBgImage.prop('checked', opts.rotateBg);
         $enableSound.prop('checked', opts.sound);
     });
 
@@ -364,7 +397,7 @@
 
     $settingsSaveBtn.on('click', () => {
         if (buzzerChanged && buzzer.name && buzzer.src) {
-            window.localStorage.setItem('simple-timers.buzzer', JSON.stringify(buzzer));
+            saveLocal('buzzer', buzzer);
             setBuzzerSound(buzzer);
             buzzerChanged = false;
         }
@@ -376,13 +409,14 @@
             sounds.startLoop(sounds.$tick, loopMs);
         }
 
+        opts.rotateBg = $rotateBgImage.is(':checked');
         const backgroud = $enableBgImage.is(':checked');
         if (opts.background !== backgroud) {
             opts.background = backgroud;
             setBackground();
             $attribution.toggle(opts.background);
         }
-        window.localStorage.setItem('simple-timers.opts', JSON.stringify(opts));
+        saveLocal('opts', opts);
 
         $settingsDlg.modal('hide');
     });
@@ -390,28 +424,25 @@
     /** Re-hydrate **/
     const rehydrate = (key, fn) => {
         try {
-            const savedData = window.localStorage.getItem(key);
+            const savedData = window.localStorage.getItem('simple-timers.' + key);
             const data = JSON.parse(savedData);
             if (data) {
-                return fn(data);
+                return fn(data) || true;
             }
         } catch (e) {
             console.error('Failed to rehydrate ' + key, e);
         }
+        return false;
     };
 
-    rehydrate('simple-timers.opts', (data) => {
-        opts.background = data.background;
-        opts.sound = data.sound;
-        opts.minBefore = data.minBefore;
+    let rehydrated = rehydrate('opts', (data) => {
+        opts.background = !!data.background;
+        opts.rotateBg = !!data.rotateBg;
+        opts.sound = !!data.sound;
+        opts.minBefore = typeof data.minBefore === 'number' ? data.minBefore : 5;
     });
 
-    if (opts.background) {
-        $(() => setBackground());
-    }
-    $attribution.toggle(opts.background);
-
-    rehydrate('simple-timers.timers', (data) => {
+    rehydrated = rehydrate('timers', (data) => {
         const now = new Date();
         timers = data.timers.map((timer) => {
             return {
@@ -424,10 +455,25 @@
         timers.forEach((timer) => createTimerCard(timer));
     });
 
-    rehydrate('simple-timers.buzzer', (data) => {
+    rehydrated = rehydrate('buzzer', (data) => {
         setBuzzerSound(data)
         buzzer = data;
     });
+
+    rehydrated = rehydrate('background', (data) => {
+        const currentDate = moment().format('YYYYMMDD');
+        bg = data || {};
+
+        if (bg.date !== currentDate && opts.rotateBg) {
+            bg = {};
+        }
+        setBackground();
+    });
+
+    if (!rehydrated) {
+        $(() => setBackground());
+        $attribution.toggle(opts.background);
+    }
 
     /** Main driver **/
     let loopMs = 0;
