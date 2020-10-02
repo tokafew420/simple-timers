@@ -10,12 +10,6 @@ body {
   padding-top: 54px;
 }
 
-@media (min-width: 992px) {
-  body {
-    padding-top: 56px;
-  }
-}
-
 .navbar {
   background-color: #0b1d36;
 }
@@ -30,12 +24,15 @@ hr {
   border-top: 1px solid #dddddd;
 }
 
+.alert-light {
+  background-color: rgba(254, 254, 254, 0.85);
+}
+
 .card {
-  background-color: #1e3e6b;
+  background-color: rgb(30, 62, 107, 0.85);
   border: #dddddd solid 6px;
   border-radius: 4px;
-  height: 100%;
-  min-height: 72px;
+  color: #ffffff;
   margin: 6px;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12), 0 3px 6px rgba(0, 0, 0, 0.24);
   transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
@@ -47,27 +44,35 @@ hr {
 }
 
 .card .title {
-  color: #ffffff;
   font-size: 27px;
   line-height: 48px;
 }
 
 .card-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: -12px;
+  right: -12px;
   background-color: #b72930;
   color: #ffffff;
   border: solid 2px #ffffff;
-  border-radius: 1rem;
+  border-radius: 34px;
   display: inline-block;
-  padding: .25em .4em;
+  padding: 4px;
   font-weight: 700;
   text-align: center;
-  white-space: nowrap;
-  vertical-align: baseline;
   width: 34px;
   height: 34px;
+  transition: all .2s cubic-bezier(.25, .8, .25, 1);
+}
+
+.card-badge:hover {
+  width: 48px;
+  height: 48px;
+  border-radius: 48px;
+  font-size: 24px;
+  padding: 5px;
+  top: -20px;
+  right: -20px;
 }
 
 .modal-content {
@@ -103,35 +108,36 @@ hr {
   animation: spin .75s linear infinite;
 }
 
-.now-card:hover,
-.timer-remove:hover {
+.now-card,
+.timer-remove {
   cursor: pointer;
 }
 
-.timer-danger .card-body,
-.timer-danger .card-body .title {
+@media (max-width: 576px) {
+  #new-alarm-modal .time-separator {
+    padding: 8px 8px;
+  }
+}
+
+.timer-danger .card-body {
   animation-name: timer-danger;
   animation-duration: 2s;
   animation-iteration-count: infinite;
 }
 
-.timer-danger.timer-danger-1 .card-body,
-.timer-danger.timer-danger-1 .card-body .title {
+.timer-danger.timer-danger-1 .card-body {
   animation-duration: 1.5s;
 }
 
-.timer-danger.timer-danger-2 .card-body,
-.timer-danger.timer-danger-2 .card-body .title {
+.timer-danger.timer-danger-2 .card-body {
   animation-duration: 1s;
 }
 
-.timer-danger.timer-danger-3 .card-body,
-.timer-danger.timer-danger-3 .card-body .title {
+.timer-danger.timer-danger-3 .card-body {
   animation-duration: .5s;
 }
 
-.timer-over .card-body,
-.timer-over .card-body .title {
+.timer-over .card-body {
   background-color: #b72930;
   color: #ffffff;
 }

@@ -26,23 +26,23 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="#"><i class="far fa-clock fa-fw"></i>&nbsp;Simple Timers</a>
+            <a class="navbar-brand" href="#"><i class="far fa-clock fa-fw mr-1"></i>Simple Timers</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbar">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item ative">
-                        <a class="nav-link text-success new-timer-link" href="#" data-toggle="modal" data-target="#new-timer-modal"><i class="far fa-stopwatch fa-fw"></i>&nbsp;New Timer</a>
+                        <a class="nav-link text-success new-timer-link" href="#" data-toggle="modal" data-target="#new-timer-modal"><i class="far fa-stopwatch fa-fw mr-1"></i>New Timer</a>
                     </li>
                     <li class="nav-item active">
-                        <a class="nav-link text-success new-alarm-link" href="#" data-toggle="modal" data-target="#new-alarm-modal"><i class="far fa-alarm-clock fa-fw"></i>&nbsp;New Alarm</a>
+                        <a class="nav-link text-success new-alarm-link" href="#" data-toggle="modal" data-target="#new-alarm-modal"><i class="far fa-alarm-clock fa-fw mr-1"></i>New Alarm</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-danger clear-all-link" href="#"><i class="far fa-trash-alt fa-fw"></i>&nbsp;Clear All</a>
+                        <a class="nav-link text-danger clear-all-link" href="#"><i class="far fa-trash-alt fa-fw mr-1"></i>Clear All</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-secondary settings-link" href="#" data-toggle="modal" data-target="#settings-modal"><i class="fas fa-cog fa-fw"></i>&nbsp;Settings</a>
+                        <a class="nav-link text-secondary settings-link" href="#" data-toggle="modal" data-target="#settings-modal"><i class="fas fa-cog fa-fw mr-1"></i>Settings</a>
                     </li>
                 </ul>
             </div>
@@ -58,12 +58,7 @@
                             <div class="container">
                                 <div class="row">
                                     <div class="col">
-                                        <div class="title">Current Time:</div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col">
-                                        <div id="now" class="title"></div>
+                                        <div><i class="far fa-clock fa-fw fa-2x mr-1"></i><span id="now" class="title"></span></div>
                                     </div>
                                 </div>
                             </div>
@@ -83,10 +78,10 @@
             </div>
             <div class="row py-3">
                 <div class="col-12 col-sm-6 mb-2">
-                    <div class="btn btn-success btn-lg btn-block" data-toggle="modal" data-target="#new-timer-modal"><i class="far fa-stopwatch fa-fw"></i>&nbsp;New Timer</div>
+                    <button class="btn btn-success btn-lg btn-block" data-toggle="modal" data-target="#new-timer-modal"><i class="far fa-stopwatch fa-fw mr-1"></i>New Timer</button>
                 </div>
                 <div class="col-12 col-sm-6 mb-2">
-                    <div class="btn btn-success btn-lg btn-block" data-toggle="modal" data-target="#new-alarm-modal"><i class="far fa-alarm-clock fa-fw"></i>&nbsp;New Alarm</div>
+                    <button class="btn btn-success btn-lg btn-block" data-toggle="modal" data-target="#new-alarm-modal"><i class="far fa-alarm-clock fa-fw mr-1"></i>New Alarm</button>
                 </div>
             </div>
             <hr />
@@ -103,7 +98,7 @@
             <div class="row my-3 timer-row">
                 <div class="col timer-container">
                     <div class="card timer-card">
-                        <div class="card-body d-flex">
+                        <div class="card-body">
                             <div class="container">
                                 <div class="row">
                                     <div class="col">
@@ -241,7 +236,7 @@
                                         <select id="new-alarm-hour-input" class="custom-select custom-select-lg form-control" aria-label="Hour" aria-describedby="new-alarm-time-lbl">
                                         </select>
                                         <div class="input-group-append">
-                                            <span class="input-group-text">:</span>
+                                            <span class="input-group-text time-separator">:</span>
                                         </div>
                                         <select id="new-alarm-minute-input" class="custom-select custom-select-lg form-control" aria-label="Minute" aria-describedby="new-alarm-time-lbl">
                                             <option value="0">00</option>

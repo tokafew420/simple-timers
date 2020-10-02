@@ -8,5 +8,6 @@ Create simple timers and alarms for daily use.
 - Set how many minutes before the time runs out when the timer starts ticking.
 - Customize the buzzer sound (when time runs out).
 - Optionally label the timer.
+- Scenic backgrounds via [Unsplash](https://unsplash.com/)
 
 Check it out at https://tokafew420.github.io/simple-timers/

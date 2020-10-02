@@ -468,6 +468,7 @@
             bg = {};
         }
         setBackground();
+        $attribution.toggle(opts.background);
     });
 
     if (!rehydrated) {
@@ -488,7 +489,7 @@
             const left = Math.floor((timer.endTime - now) / 1000);
 
             if (left <= 0) {
-                timer.$card.removeClass('timer-danger timer-danger-0 timer-danger-1 timer-danger-2 timer-danger-3')
+                timer.$card.removeClass('timer-danger timer-danger-1 timer-danger-2 timer-danger-3')
                     .addClass('timer-over');
                 timer.$left.text('Finished!!');
                 sounds.play(sounds.$buzzer);
@@ -508,9 +509,12 @@
                         minLeft = left;
                     }
 
+                    timer.$card.addClass('timer-danger');
                     const animationInterval = getAnimationInterval(left);
-                    timer.$card.removeClass('timer-danger-0 timer-danger-1 timer-danger-2 timer-danger-3')
-                        .addClass('timer-danger timer-danger-' + animationInterval);
+                    if (animationInterval) {
+                        timer.$card.removeClass('timer-danger-' + (animationInterval - 1))
+                            .addClass('timer-danger-' + animationInterval);
+                    }
                 }
             }
         });
