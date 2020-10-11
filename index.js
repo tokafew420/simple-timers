@@ -15,6 +15,8 @@
             $blop: $('#audio-blop'),
             $buzzer: $('#audio-buzzer'),
             $break: $('#audio-break'),
+            $activate: $('#audio-activate'),
+            $end: $('#audio-end'),
             play: ($sound) => {
                 if (opts.sound) {
                     $sound[0].pause();
@@ -250,6 +252,22 @@
             $newTimerInvalidFeedback.show();
             return;
         }
+
+        createTimer(hours, minutes, seconds, minBefore, name);
+        $newTimerDlg.modal('hide');
+    });
+
+    $newTimerHour.add($newTimerMin)
+        .add($newTimerSec)
+        .add($newTimerName)
+        .add($newTimerMinBefore)
+        .on('keyup', (e) => {
+            if (e.key === 'Enter') {
+                $newTimerAddBtn.click();
+            }
+        });
+
+    const createTimer = (hours, minutes, seconds, minBefore, name) => {
         const later = new Date();
         later.setHours(later.getHours() + hours);
         later.setMinutes(later.getMinutes() + minutes)
@@ -263,8 +281,9 @@
         timers.push(timer);
         createTimerCard(timer);
         saveTimers();
-        $newTimerDlg.modal('hide');
-    });
+
+        return later;
+    };
 
     /** New alarm **/
     const $newAlarmDlg = $('#new-alarm-modal');
@@ -283,6 +302,17 @@
         later.setHours(hour, minute, 0, 0);
 
         return later;
+    };
+
+    const createAlarm = (later, minBefore, name) => {
+        const timer = {
+            endTime: later,
+            name: name,
+            minBefore: minBefore
+        };
+        timers.push(timer);
+        createTimerCard(timer);
+        saveTimers();
     };
 
     $newAlarmMinBefore.val(opts.minBefore);
@@ -328,19 +358,21 @@
         if ($('.is-invalid', $newTimerDlg).length) return;
 
         if (later > now) {
-            const timer = {
-                endTime: later,
-                name: name,
-                minBefore: minBefore
-            };
-            timers.push(timer);
-            createTimerCard(timer);
-            saveTimers();
+            createAlarm(later, +$newAlarmMinBefore.val(), name);
             $newAlarmDlg.modal('hide');
         } else {
             $('.invalid-time', $newAlarmDlg).show();
         }
     });
+
+    $newAlarmHour.add($newAlarmMin)
+        .add($newAlarmName)
+        .add($newAlarmMinBefore)
+        .on('keyup', (e) => {
+            if (e.key === 'Enter') {
+                $newAlarmAddBtn.click();
+            }
+        });
 
     /** Clear **/
     const clearAll = () => {
@@ -420,6 +452,210 @@
 
         $settingsDlg.modal('hide');
     });
+
+    /** Voice **/
+    const utterance = 'speechSynthesis' in window ? new SpeechSynthesisUtterance() : null;
+    if (utterance) {
+        window.speechSynthesis.onvoiceschanged = () => {
+            // Note: some voices don't support altering params
+
+            // Voices as of 11/11/2020
+            // Microsoft David Desktop - English (United States) (en-US)
+            // Microsoft Zira Desktop - English (United States) (en-US)
+            // Google Deutsch (de-DE)
+            // Google US English (en-US)
+            // Google UK English Female (en-GB)
+            // Google UK English Male (en-GB)
+            // Google español (es-ES)
+            // Google español de Estados Unidos (es-US)
+            // Google français (fr-FR)
+            // Google हिन्दी (hi-IN)
+            // Google Bahasa Indonesia (id-ID)
+            // Google italiano (it-IT)
+            // Google 日本語 (ja-JP)
+            // Google 한국의 (ko-KR)
+            // Google Nederlands (nl-NL)
+            // Google polski (pl-PL)
+            // Google português do Brasil (pt-BR)
+            // Google русский (ru-RU)
+            // Google 普通话（中国大陆） (zh-CN)
+            // Google 粤語（香港） (zh-HK)
+            // Google 國語（臺灣） zh-TW
+
+            var voices = window.speechSynthesis.getVoices()
+                .filter((v) => v.name === 'Google US English' && v.lang === 'en-US');
+
+            if (voices.length) {
+                utterance.voice = voices[0];
+                utterance.lang = voices[0].lang;
+            }
+        };
+
+        utterance.volume = 1; // 0 to 1; Default 1
+        utterance.rate = 0.9; // 0.1 to 10; Default 1
+        utterance.pitch = 1; // 0 to 2; Default 1
+    }
+
+    const speak = function (text) {
+        if (utterance) {
+            utterance.text = text
+            speechSynthesis.speak(utterance);
+        }
+    };
+
+    if (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition) {
+        var recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition)();
+        recognition.lang = 'en-US';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+        const exampleTexts = [
+            'Set a 15 minute timer.',
+            'Set an alarm for 2:30.',
+            'Set a timer for 1 minute and 30 seconds.',
+        ];
+        const confirmTexts = [
+            'Okay.',
+            'You got it!',
+            'Alright.'
+        ];
+        let confirmIdx = 0;
+        let exampleIdx = 0;
+        let isListening = false;
+        let understand = false;
+
+        const $voiceBtn = $('#voice-btn');
+        const $voiceRow = $voiceBtn.closest('.row');
+        const $voiceFeedback = $('#voice-feedback');
+        const $voiceFeedbackRow = $voiceFeedback.closest('.row');
+        const hrRegex = /(\d+)[\s\-]+hour/i;
+        const minRegex = /(\d+)[\s\-]+minute/i;
+        const secRegex = /(\d+)[\s\-]+second/i;
+        const hhmmRegex = /((1[0-2]|0?[1-9])(:([0-5][0-9]))? ?([AP]\.?M\.?)?)/i;
+
+        $voiceBtn.on('click', () => {
+            if (isListening) {
+                recognition.stop();
+            } else {
+                exampleIdx = ++exampleIdx % exampleTexts.length;
+                $voiceFeedback.html('<div><strong>Say a command <span class="wave"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span></strong></div>');
+                $voiceFeedbackRow.collapse('show');
+                recognition.start();
+            }
+        });
+
+        recognition.onstart = () => {
+            understand = false;
+            sounds.play(sounds.$activate);
+            $('.pulse', $voiceBtn).addClass('pulsing');
+            isListening = true;
+        };
+
+        recognition.onend = () => {
+            if (!understand) {
+                sounds.play(sounds.$end);
+                exampleIdx = ++exampleIdx % exampleTexts.length;
+                $voiceFeedback.html(`<div>Try saying <strong><i>"${exampleTexts[exampleIdx]}"</i></strong></div>`);
+            }
+            $('.pulse', $voiceBtn).removeClass('pulsing');
+            isListening = false;
+        };
+
+        recognition.onresult = function (event) {
+            let transcript = (event.results[0][0].transcript || '').toLowerCase();
+            console.log(transcript);
+            const isTimer = transcript.indexOf('timer') !== -1;
+            const isAlarm = transcript.indexOf('alarm') !== -1;
+            const feedback = [];
+            $voiceFeedbackRow.collapse('show');
+
+            if (isTimer) {
+                let hr = +(transcript.match(hrRegex) || [])[1] || 0;
+                let min = +(transcript.match(minRegex) || [])[1] || 0;
+                let sec = +(transcript.match(secRegex) || [])[1] || 0;
+
+                // Normalize
+                sec += (min * 60) + (hr * 3600);
+                hr = Math.floor(sec / 3600);
+                sec = sec % 3600;
+                min = Math.floor(sec / 60);
+                sec = sec % 60;
+
+                if (hr) {
+                    feedback.push(`${hr} hour${hr > 1 ? 's' : ''}`);
+                }
+                if (min) {
+                    if (hr && sec) {
+                        feedback.push(', ');
+                    } else if (hr && !sec) {
+                        feedback.push(' and ');
+                    }
+                    feedback.push(`${min} minute${min > 1 ? 's' : ''}`);
+                }
+                if (sec) {
+                    if (hr && min) {
+                        feedback.push(', and ');
+                    } else if (hr || min) {
+                        feedback.push(' and ');
+                    }
+                    feedback.push(`${sec} second${sec > 1 ? 's' : ''}`);
+                }
+                if (feedback.length) {
+                    understand = true;
+                    createTimer(hr, min, sec, +$newTimerMinBefore.val() || 0, '');
+                    confirmIdx = ++confirmIdx % confirmTexts.length;
+                    $voiceFeedback.html(`<div>${confirmTexts[confirmIdx]} Timer set for <strong>${feedback.join('')}</strong>.</div>`);
+                    speak($voiceFeedback.text());
+                    $newTimerHour.val(hr ? hr : '');
+                    $newTimerMin.val(min ? min : '');
+                    $newTimerSec.val(sec ? sec : '');
+                    return;
+                }
+            } else if (isAlarm) {
+                let match = transcript.match(hhmmRegex) || [];
+                if (match.length) {
+                    let hr = +match[2];
+                    let min = +match[4] || 0;
+                    let tt = match[5];
+                    const now = new Date();
+                    const later = new Date();
+
+                    if (hr) {
+                        if (tt) {
+                            if (hr < 12 && tt.replace(/\./g, '').toLowerCase() === 'pm') {
+                                hr += 12;
+                            }
+                            later.setHours(hr, min, 0, 0);
+                            if (later < now) {
+                                later.setDate(later.getDate() + 1);
+                            }
+                        } else {
+                            later.setHours(hr, min, 0, 0);
+                            if (later < now) {
+                                later.setHours(later.getHours() + 12);
+                                if (later < now) {
+                                    later.setHours(later.getHours() + 12);
+                                }
+                            }
+                        }
+
+                        if (later > now) {
+                            understand = true;
+                            createAlarm(later, +$newAlarmMinBefore.val(), '');
+                            confirmIdx = ++confirmIdx % confirmTexts.length;
+                            $voiceFeedback.html(`<div>${confirmTexts[confirmIdx]} Alarm set for <strong>${moment(later).format('h:mm A')}</strong>.</div>`);
+                            speak($voiceFeedback.text());
+                            return;
+                        }
+                    }
+                }
+            }
+            exampleIdx = ++exampleIdx % exampleTexts.length;
+            $voiceFeedback.html(`<div>You said: "<strong><i>${transcript}</i></strong>"</div><div>Try saying <strong><i>"${exampleTexts[exampleIdx]}"</i></strong></div>`);
+        };
+
+        $voiceRow.removeClass('d-none');
+    }
 
     /** Re-hydrate **/
     const rehydrate = (key, fn) => {
