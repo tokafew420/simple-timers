@@ -569,6 +569,7 @@
         let exampleIdx = 0;
         let isListening = false;
         let understand = false;
+        let startTime;
 
         const $voiceBtn = $('#voice-btn');
         const $voiceRow = $voiceBtn.closest('.row');
@@ -579,10 +580,10 @@
         const secRegex = /(\d+)[\s\-]+second/i;
         const hhmmRegex = /((1[0-2]|0?[1-9])(:([0-5][0-9]))? ?([AP]\.?M\.?)?)/i;
 
-        $voiceBtn.on('click', () => {
+        $voiceBtn.on('click', (evt) => {
             if (isListening) {
-                debug('Manually stop listening.');
-                recognition.stop();
+                debug('Abort listening.');
+                recognition.abort();
                 sounds.play(sounds.$end);
                 $voiceFeedbackRow.collapse('hide');
                 $('.pulse', $voiceBtn).removeClass('pulsing');
@@ -592,6 +593,7 @@
                 exampleIdx = ++exampleIdx % exampleTexts.length;
                 $voiceFeedback.html('<div><strong>Say a command <span class="wave"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span></strong></div>');
                 $voiceFeedbackRow.collapse('show');
+                startTime = evt.timeStamp;
             }
         });
 
@@ -709,7 +711,31 @@
 
         recognition.onerror = (evt) => {
             error(evt.error);
+            if (evt.error == 'audio-capture') {
+                $voiceFeedback.html('<div><strong>No microphone was found. Ensure that a microphone is installed and the <i>microphone settings</i> are configured correctly.</strong></div>').collapse('show');
+                understand = true;
+            } else if (evt.error == 'not-allowed') {
+                if (evt.timeStamp - startTime < 100) {
+                    $voiceFeedback.html('<div><strong>Permission to use microphone is blocked.</strong></div>').collapse('show');
+                } else {
+                    $voiceFeedback.html('<div><strong>Permission to use microphone was denied.</strong></div>').collapse('show');
+                }
+                understand = true;
+            }
         };
+
+        [
+            'onaudiostart',
+            'onaudioend',
+            'onnomatch',
+            'onsoundstart',
+            'onsoundend',
+            'onspeechend'
+        ].forEach((eventName) => {
+            recognition[eventName] = (e) => {
+                debug(eventName, e);
+            };
+        });
 
         $voiceRow.removeClass('d-none');
     }
