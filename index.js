@@ -61,6 +61,33 @@
         };
     };
 
+    const getQueryString = (url) => {
+        url = url || window.location.search;
+        const idx = url.indexOf('?');
+        const qs = idx === -1 ? '' : url.substring(idx + 1);
+
+        return qs
+            .split('&')
+            .map((kvp) => kvp.split('='))
+            .reduce((acc, [key, val]) => {
+                if (val !== '' && !isNaN(+val)) {
+                    val = +val;
+                } else if (val) {
+                    val = decodeURI(val);
+                } else {
+                    val = true;
+                }
+
+                if (typeof acc[key] === 'undefined') {
+                    acc[key] = val;
+                } else {
+                    if (!Array.isArray(acc[key])) acc[key] = [acc[key]];
+                    acc[key].push(val);
+                }
+                return acc;
+            }, {});
+    };
+
     $.fn.setValidity = function (isValid, message) {
         return this.each(function () {
             const $this = $(this);
@@ -108,10 +135,29 @@
     };
 
     /** Global **/
+    const $debug = $('#debug');
+    const isDebug = !!getQueryString().debug;
     const $attribution = $('#attribution');
     const $photographer = $('.photographer', $attribution);
     const $changeBackgroundBtn = $('#change-background-btn', $attribution);
     let bg = {};
+
+    const logger = (lvl, ...args) => {
+        if (isDebug) {
+            $debug.prepend(`<code class="${lvl}">${args.join()}</code>`);
+        }
+        console[lvl](...args);
+    };
+    const log = logger.bind(null, 'log');
+    const debug = logger.bind(null, 'debug');
+    const error = logger.bind(null, 'error');
+
+    if (isDebug) {
+        window.onerror = function (message, source, lineno, colno, err) {
+            error(`${message}\n\t${source}:${lineno},${colno}\n\t${err}`);
+        }
+        $debug.closest('.row').removeClass('d-none');
+    }
 
     const setBackground = () => {
         if (opts.background) {
@@ -415,7 +461,7 @@
 
             const result = await toBase64(file).catch(e => Error(e));
             if (result instanceof Error) {
-                console.error('Buzzer input file error: ', result.message);
+                log('Buzzer input file error: ', result.message);
                 return;
             }
             buzzer = {
@@ -423,7 +469,7 @@
                 src: result
             };
             buzzerChanged = true;
-            console.debug('Buzzer input file', buzzer);
+            debug('Buzzer input file', buzzer);
         }
     });
 
@@ -535,16 +581,22 @@
 
         $voiceBtn.on('click', () => {
             if (isListening) {
+                debug('Manually stop listening.');
                 recognition.stop();
+                sounds.play(sounds.$end);
+                $voiceFeedbackRow.collapse('hide');
+                $('.pulse', $voiceBtn).removeClass('pulsing');
+                isListening = false;
             } else {
+                recognition.start();
                 exampleIdx = ++exampleIdx % exampleTexts.length;
                 $voiceFeedback.html('<div><strong>Say a command <span class="wave"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span></strong></div>');
                 $voiceFeedbackRow.collapse('show');
-                recognition.start();
             }
         });
 
         recognition.onstart = () => {
+            debug('Start listening...');
             understand = false;
             sounds.play(sounds.$activate);
             $('.pulse', $voiceBtn).addClass('pulsing');
@@ -552,6 +604,7 @@
         };
 
         recognition.onend = () => {
+            debug('Stop listening.');
             if (!understand) {
                 sounds.play(sounds.$end);
                 exampleIdx = ++exampleIdx % exampleTexts.length;
@@ -563,7 +616,7 @@
 
         recognition.onresult = function (event) {
             let transcript = (event.results[0][0].transcript || '').toLowerCase();
-            console.log(transcript);
+            log(transcript);
             const isTimer = transcript.indexOf('timer') !== -1;
             const isAlarm = transcript.indexOf('alarm') !== -1;
             const feedback = [];
@@ -654,6 +707,10 @@
             $voiceFeedback.html(`<div>You said: "<strong><i>${transcript}</i></strong>"</div><div>Try saying <strong><i>"${exampleTexts[exampleIdx]}"</i></strong></div>`);
         };
 
+        recognition.onerror = (evt) => {
+            error(evt.error);
+        };
+
         $voiceRow.removeClass('d-none');
     }
 
@@ -666,7 +723,7 @@
                 return fn(data) || true;
             }
         } catch (e) {
-            console.error('Failed to rehydrate ' + key, e);
+            error('Failed to rehydrate ' + key, e);
         }
         return false;
     };

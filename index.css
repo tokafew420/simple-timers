@@ -229,3 +229,24 @@ hr {
     transform: translateY(-10px);
   }
 }
+
+#debug {
+  overflow-x: auto;
+}
+
+#debug code {
+  display: block;
+  white-space: pre;
+}
+
+#debug code.log {
+  color: #212529;
+}
+
+#debug code.debug {
+  color: #818182;
+}
+
+#debug code.error {
+  color: #721c24;
+}
