@@ -46,6 +46,8 @@
     let timers = [];
 
     /** Helpers */
+    const getNow = () => new Date();
+
     const toBase64 = file => new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -59,6 +61,18 @@
             h: $window.height(),
             w: $window.width()
         };
+    };
+
+    const supportTimeInput = () => {
+        try {
+            var input = document.createElement('input');
+            input.type = "time";
+
+            return input.type === 'time';
+        } catch (e) {
+            debug("not supported");
+        }
+        return false;
     };
 
     const getQueryString = (url) => {
@@ -88,6 +102,8 @@
             }, {});
     };
 
+    const sanitizeName = (name) => (name || '').replace(/(\r\n|\n|\r)/gm, '').trim();
+
     $.fn.setValidity = function (isValid, message) {
         return this.each(function () {
             const $this = $(this);
@@ -99,12 +115,16 @@
         });
     };
 
+    $.fn.isValid = function () {
+        return !$(this).hasClass('is-invalid');
+    };
+
     const saveLocal = (key, obj) => {
         window.localStorage.setItem('simple-timers.' + key, JSON.stringify(obj));
     };
 
     const saveTimers = () => {
-        const now = new Date();
+        const now = getNow();
         saveLocal('timers', {
             timers: timers.filter((timer) => timer.endTime >= now)
                 .map((timer) => {
@@ -220,7 +240,7 @@
     const createTimerCard = (timer) => {
         const $card = $cardTmpl.clone();
         if (timer.name) {
-            $('.timer-name', $card).text(timer.name).removeClass('d-none');
+            $('.timer-name', $card).text(timer.name).closest('.row').removeClass('d-none');
         }
         $('.timer-until', $card).text(moment(timer.endTime).format('hh:mm A'));
 
@@ -247,11 +267,44 @@
         }
     }
 
-    $('body').on('click', '.timer-remove', function () {
+    $('body').on('mouseenter', '.card', () => sounds.play(sounds.$blop));
+
+    $timers.on('click', '.timer-remove', function () {
         const timer = $(this).closest('.timer-row').data('timer');
         if (timer) destroyTimerCard(timer);
         saveTimers();
-    }).on('mouseenter', '.card', () => sounds.play(sounds.$blop));
+    }).on('click', '.timer-name-edit', function () {
+        $('.timer-name', $(this).parent()).focus();
+    }).on('keydown', '.timer-name', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            $(this).blur();
+        }
+    }).on('paste', '.timer-name', (e) => {
+        e.preventDefault();
+        const name = sanitizeName((e.originalEvent.clipboardData || window.clipboardData).getData('text'));
+        const selection = window.getSelection();
+
+        if (!selection.rangeCount) return false;
+        selection.deleteFromDocument();
+        selection.getRangeAt(0).insertNode(document.createTextNode(name));
+    }).on('input', '.timer-name', function (e) {
+        if (e.type === 'input' && e.originalEvent.inputType !== 'insertFromDrop') return;
+        const $this = $(this);
+        $this.text(sanitizeName($this.text()));
+    }).on('blur', '.timer-name', function () {
+        const $this = $(this);
+        const timer = $this.closest('.timer-row').data('timer');
+        const name = sanitizeName($this.text());
+
+        if (!name) {
+            $this.closest('.row').addClass('d-none');
+        }
+        if (timer) {
+            timer.name = name;
+            saveTimers();
+        }
+    });
 
     /** New timer **/
     const $newTimerDlg = $('#new-timer-modal');
@@ -314,7 +367,7 @@
         });
 
     const createTimer = (hours, minutes, seconds, minBefore, name) => {
-        const later = new Date();
+        const later = getNow();
         later.setHours(later.getHours() + hours);
         later.setMinutes(later.getMinutes() + minutes)
         later.setSeconds(later.getSeconds() + seconds, 0);
@@ -334,18 +387,35 @@
     /** New alarm **/
     const $newAlarmDlg = $('#new-alarm-modal');
     const $newAlarmInvalidFeedback = $('.invalid-time', $newAlarmDlg);
+    const $newAlarmTime = $('#new-alarm-time-input', $newAlarmDlg);
     const $newAlarmHour = $('#new-alarm-hour-input', $newAlarmDlg);
     const $newAlarmMin = $('#new-alarm-minute-input', $newAlarmDlg);
     const $newAlarmTt = $('#new-alarm-tt-lbl', $newAlarmDlg);
     const $newAlarmName = $('#new-alarm-name-input', $newAlarmDlg);
     const $newAlarmMinBefore = $('#new-alarm-minutes-before-input', $newAlarmDlg);
     const $newAlarmAddBtn = $('#new-alarm-add-btn', $newAlarmDlg);
+    const isTimeInputSupported = supportTimeInput();
 
     const getNewAlarmTime = () => {
-        const hour = +$newAlarmHour.val();
-        const minute = +$newAlarmMin.val();
-        const later = new Date();
+        const now = getNow();
+        const later = getNow();
+        let hour = 0;
+        let minute = 0;
+        if (isTimeInputSupported) {
+            let time = $newAlarmTime.val();
+            if (/^[0-2][0-9]:[0-5][0-9]$/.test(time)) {
+                const hhmm = time.split(':');
+                hour = +hhmm[0];
+                minute = +hhmm[1];
+            } else {
+                $newAlarmTime.setValidity(false);
+            }
+        } else {
+            hour = +$newAlarmHour.val();
+            minute = +$newAlarmMin.val();
+        }
         later.setHours(hour, minute, 0, 0);
+        if (later < now) later.setDate(now.getDate() + 1);
 
         return later;
     };
@@ -361,6 +431,12 @@
         saveTimers();
     };
 
+    if (isTimeInputSupported) {
+        $newAlarmTime.closest('.row').removeClass('d-none');
+    } else {
+        $newAlarmHour.closest('.row').removeClass('d-none');
+    }
+
     $newAlarmMinBefore.val(opts.minBefore);
 
     $newAlarmDlg.modal({
@@ -370,20 +446,25 @@
         show: false
     }).on('show.bs.modal', () => {
         $newAlarmInvalidFeedback.hide();
-        const now = new Date();
+        const now = getNow();
         let hour = now.getHours();
 
-        $newAlarmHour.empty();
-        for (let i = 0; i < 12; i++) {
-            let lbl = hour % 12;
-            if (!lbl) lbl = 12;
-            $newAlarmHour.append('<option value="' + hour + '">' + lbl + '</option>');
-            hour++;
+        if (isTimeInputSupported) {
+            $newAlarmTime.setValidity().val(moment().format('HH:mm'));
+        } else {
+            $newAlarmHour.empty();
+            for (let i = 0; i < 12; i++) {
+                let lbl = hour % 12;
+                if (!lbl) lbl = 12;
+                $newAlarmHour.append('<option value="' + hour + '">' + lbl + '</option>');
+                hour++;
+            }
+            $newAlarmHour.val($('option', $newAlarmHour).eq(0).val());
+            $newAlarmMin.val(now.getMinutes() + 1);
+            $newAlarmTt.text(moment().format('A'));
         }
-        $newAlarmHour.val($('option', $newAlarmHour).eq(0).val());
-        $newAlarmMin.val(now.getMinutes() + 1);
-        $newAlarmTt.text(moment().format('A'));
         $newAlarmName.setValidity().val('');
+        if (!$newAlarmMinBefore.isValid()) $newAlarmMinBefore.val(opts.minBefore);
     });
 
     $newAlarmHour.add($newAlarmMin).on('change', () => {
@@ -394,7 +475,7 @@
 
     $newAlarmAddBtn.on('click', () => {
         $newAlarmInvalidFeedback.hide();
-        const now = new Date();
+        const now = getNow();
         const later = getNewAlarmTime();
         const name = ($newAlarmName.setValidity().val() || '').trim();
         const minBefore = +$newAlarmMinBefore.setValidity().val();
@@ -411,7 +492,8 @@
         }
     });
 
-    $newAlarmHour.add($newAlarmMin)
+    $newAlarmTime.add($newAlarmHour)
+        .add($newAlarmMin)
         .add($newAlarmName)
         .add($newAlarmMinBefore)
         .on('keyup', (e) => {
@@ -672,8 +754,8 @@
                     let hr = +match[2];
                     let min = +match[4] || 0;
                     let tt = match[5];
-                    const now = new Date();
-                    const later = new Date();
+                    const now = getNow();
+                    const later = getNow();
 
                     if (hr) {
                         if (tt) {
@@ -762,7 +844,7 @@
     });
 
     rehydrated = rehydrate('timers', (data) => {
-        const now = new Date();
+        const now = getNow();
         timers = data.timers.map((timer) => {
             return {
                 endTime: new Date(timer.endTime),
@@ -798,7 +880,7 @@
     /** Main driver **/
     let loopMs = 0;
     setInterval(() => {
-        const now = new Date();
+        const now = getNow();
         $now.text(moment().format(formats[nowFormat]));
 
         let hasMinBefore = false;

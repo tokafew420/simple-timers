@@ -75,6 +75,14 @@ hr {
   right: -20px;
 }
 
+.timer-card .timer-name-edit {
+  display: none;
+}
+
+.timer-card:hover .timer-name-edit {
+  display: inline;
+}
+
 .modal-content {
   background-color: #1e3e6b;
   color: #ffffff;

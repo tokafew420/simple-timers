@@ -120,9 +120,9 @@
                     <div class="card timer-card">
                         <div class="card-body">
                             <div class="container">
-                                <div class="row">
+                                <div class="row d-none">
                                     <div class="col">
-                                        <div class="title timer-name d-none"></div>
+                                        <div class="title"><span class="timer-name" contenteditable="true"></span><i class="fas fa-pencil-alt fa-xs fa-fw ml-2 timer-name-edit" role="button"></i></div>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -247,18 +247,29 @@
                                     <span class="invalid-time text-danger">Pick a later time</span>
                                 </div>
                             </div>
-                            <div class="row">
+                            <div class="row d-none">
                                 <div class="col">
                                     <div class="input-group input-group-lg mb-3">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text" id="new-alarm-time-lbl"><i class="far fa-clock fa-fw mr-1"></i><span class="d-none d-sm-block">Time</span></span>
                                         </div>
-                                        <select id="new-alarm-hour-input" class="custom-select custom-select-lg form-control" aria-label="Hour" aria-describedby="new-alarm-time-lbl">
+                                        <input type="time" id="new-alarm-time-input" class="form-control" aria-label="Time" aria-describedby="new-alarm-time-lbl" />
+                                    </div>
+                                    <div class="invalid-feedback">Invalid</div>
+                                </div>
+                            </div>
+                            <div class="row d-none">
+                                <div class="col">
+                                    <div class="input-group input-group-lg mb-3">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="new-alarm-hhmm-lbl"><i class="far fa-clock fa-fw mr-1"></i><span class="d-none d-sm-block">Time</span></span>
+                                        </div>
+                                        <select id="new-alarm-hour-input" class="custom-select custom-select-lg form-control" aria-label="Hour" aria-describedby="new-alarm-hhmm-lbl">
                                         </select>
                                         <div class="input-group-append">
                                             <span class="input-group-text time-separator">:</span>
                                         </div>
-                                        <select id="new-alarm-minute-input" class="custom-select custom-select-lg form-control" aria-label="Minute" aria-describedby="new-alarm-time-lbl">
+                                        <select id="new-alarm-minute-input" class="custom-select custom-select-lg form-control" aria-label="Minute" aria-describedby="new-alarm-hhmm-lbl">
                                             <option value="0">00</option>
                                             <option value="1">01</option>
                                             <option value="2">02</option>
@@ -348,6 +359,7 @@
                                         </div>
                                         <input type="number" id="new-alarm-minutes-before-input" class="form-control" aria-label="Minutes Before" aria-describedby="new-alarm-minutes-before-lbl" min="0" />
                                     </div>
+                                    <div class="invalid-feedback">Invalid</div>
                                 </div>
                             </div>
                         </div>
