@@ -383,17 +383,43 @@
                     </div>
                     <div class="modal-body">
                         <div class="container">
-                            <div class="row">
+                            <div id="buzzer-sound-file-section" class="row">
                                 <div class="col">
                                     <div class="form-group">
                                         <label>Choose a custom sound for the buzzer</label>
                                         <div class="input-group">
                                             <div class="custom-file">
-                                                <input type="file" class="custom-file-input" id="buzzer-sound-file-input" accept="audio/wav, audio/mpeg, audio/mp4, audio/aac, audio/aacp, audio/ogg, audio/webm, audio/flac" />
+                                                <input type="file" class="custom-file-input" id="buzzer-sound-file-input" accept="audio/*" />
                                                 <label class="custom-file-label" for="buzzer-sound-file-input">Choose file</label>
                                             </div>
+                                            <div class="input-group-append">
+                                                <button id="buzzer-sound-reset-btn" class="btn btn-danger" type="button">Reset</button>
+                                              </div>
                                         </div>
                                         <div class="invalid-feedback">Invalid</div>
+                                        <small id="buzzer-sound-file-default-help" class="form-text text-muted">Defaults to the sound of an air horn.</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="settings-record-audio-section" class="row d-none">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label>Record custom buzzer</label>
+                                        <div class="input-group input-group-lg">
+                                            <div class="input-group-prepend">
+                                                <button type="button" id="settings-record-audio-btn" class="btn btn-secondary">
+                                                    <div class="pulse mr-1"><i class="far fa-microphone fa-fw"></i></div>
+                                                </button>
+                                            </div>
+                                            <audio id="settings-record-audio-player" class="form-control" src="./sounds/air-horn.mp3" preload="auto" controls></audio>
+                                        </div>
+                                        <div class="invalid-feedback">Invalid</div>
+                                        <small id="settings-record-audio-help" class="form-text text-muted">Record a custom buzzer sound. Up to 3 seconds.</small>
+                                        <small id="settings-record-audio-prompt-help" class="form-text d-none">Please grant permission to access your microphone.</small>
+                                        <small id="settings-record-audio-denied-help" class="form-text text-danger d-none">Please grant permission to access your microphone.</small>
+                                        <div class="progress d-none">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+                                          </div>
                                     </div>
                                 </div>
                             </div>

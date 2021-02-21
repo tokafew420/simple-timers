@@ -238,6 +238,61 @@ hr {
   }
 }
 
+/** buzzer-sound-file-section **/
+#buzzer-sound-file-section #buzzer-sound-reset-btn {
+  display: none;
+}
+
+#buzzer-sound-file-section .custom-file-label {
+  border-radius: .25rem;
+}
+
+#buzzer-sound-file-section.has-file #buzzer-sound-reset-btn {
+  display: inline-block;
+}
+
+#buzzer-sound-file-section.has-file .custom-file-label {
+  border-radius: .25rem 0 0 .25rem;
+}
+
+#buzzer-sound-file-section.has-file #buzzer-sound-file-default-help {
+  display: none;
+}
+
+/** settings-record-audio-section **/
+#settings-record-audio-section.granted.recording #settings-record-audio-btn {
+  color: #fff;
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+#settings-record-audio-section.prompt.recording #settings-record-audio-prompt-help {
+  display: block !important;
+}
+
+#settings-record-audio-section.denied #settings-record-audio-denied-help {
+  display: block !important;
+}
+
+#settings-record-audio-section.recording.started .progress {
+  display: flex !important;
+}
+
+#settings-record-audio-section.recording.started .progress-bar {
+  animation: progress-0-to-100 3s linear 1;
+}
+
+@keyframes progress-0-to-100 {
+
+  0% {
+    width: 0;
+  }
+
+  100% {
+    width: 100%;
+  }
+}
+
 #debug {
   overflow-x: auto;
 }

@@ -66,11 +66,11 @@
     const supportTimeInput = () => {
         try {
             var input = document.createElement('input');
-            input.type = "time";
+            input.type = 'time';
 
             return input.type === 'time';
         } catch (e) {
-            debug("not supported");
+            debug('Time input not supported', e);
         }
         return false;
     };
@@ -121,6 +121,7 @@
 
     const saveLocal = (key, obj) => {
         window.localStorage.setItem('simple-timers.' + key, JSON.stringify(obj));
+        debug('Save local data', 'simple-timers.' + key, JSON.stringify(obj));
     };
 
     const saveTimers = () => {
@@ -164,7 +165,7 @@
 
     const logger = (lvl, ...args) => {
         if (isDebug) {
-            $debug.prepend(`<code class="${lvl}">${args.join()}</code>`);
+            $debug.prepend(`<code class="${lvl}">${args.join(', ')}</code>`);
         }
         console[lvl](...args);
     };
@@ -182,12 +183,16 @@
     const setBackground = () => {
         if (opts.background) {
             if (bg.name && bg.url) {
+                debug('Set saved background');
                 $photographer.text(bg.name);
                 $('body').css('background-image', `url(${bg.url})`);
             } else {
+                debug('Request new background');
+
                 const viewport = getViewportSize();
-                $.getJSON(`https://api.unsplash.com/photos/random?client_id=Xy8zbnyDJZR1I8xv5m8p_G5khxSdCmGfMgZsZu8A2rA&query=nature,water`, function (res, status, xhr) {
+                $.getJSON(`https://api.unsplash.com/photos/random?client_id=Xy8zbnyDJZR1I8xv5m8p_G5khxSdCmGfMgZsZu8A2rA&query=wallpapers-nature`, function (res, status, xhr) {
                     if (res && res.user && res.urls) {
+                        debug('Random background retrieved');
                         bg.name = res.user.name;
                         bg.url = res.urls.regular;
                         bg.date = moment().format('YYYYMMDD');
@@ -197,10 +202,13 @@
                             $('body').css('background-image', `url(${bg.url})`);
                             saveLocal('background', bg);
                         }
+                    } else {
+                        error('Failed to retrieve new background', res);
                     }
                 });
             }
         } else {
+            debug('Background image disabled');
             $('body').css('background-image', 'none');
         }
     };
@@ -515,22 +523,58 @@
 
     /** Settings **/
     const $settingsDlg = $('#settings-modal');
-    const $buzzerFileInput = $('#buzzer-sound-file-input', $settingsDlg);
+    const $buzzerFileSection = $('#buzzer-sound-file-section', $settingsDlg);
+    const $buzzerFileInput = $('#buzzer-sound-file-input', $buzzerFileSection);
+    const $buzzerResetBtn = $('#buzzer-sound-reset-btn', $buzzerFileSection);
+    const $recordSection = $('#settings-record-audio-section', $settingsDlg);
+    const $recordBtn = $('#settings-record-audio-btn', $recordSection);
+    const $recordPlayer = $('#settings-record-audio-player', $recordSection);
     const $enableSound = $('#enable-sound', $settingsDlg);
     const $enableBgImage = $('#enable-background-image', $settingsDlg);
     const $rotateBgImage = $('#rotate-background-image', $settingsDlg);
     const $settingsSaveBtn = $('#settings-save-btn', $settingsDlg);
-    let buzzer = {};
+    let buzzer;
+    let newBuzzer;
     let buzzerChanged = false;
+    let microphonePerm = 'denied';
+    let recording = false;
 
     const setBuzzerSound = (buzzer) => {
-        sounds.$buzzer.attr('src', buzzer.src);
+        sounds.$buzzer.attr('src', buzzer && buzzer.src || './sounds/air-horn.mp3');
         sounds.$buzzer[0].load();
-        $('label[for="buzzer-sound-file-input"]', $settingsDlg).text(buzzer.name);
+    };
+
+    const setBuzzerInputs = (buzzer) => {
+        if (buzzer && buzzer.name && buzzer.src) {
+            $('label[for="buzzer-sound-file-input"]', $settingsDlg).text(buzzer.name);
+            $recordPlayer.attr('src', buzzer.src);
+            $buzzerFileSection.addClass('has-file');
+        } else {
+            $('label[for="buzzer-sound-file-input"]', $settingsDlg).text('Choose File');
+            $recordPlayer.attr('src', './sounds/air-horn.mp3');
+            $buzzerFileSection.removeClass('has-file');
+        }
+    };
+
+    const setRecordState = (state) => {
+        microphonePerm = state;
+        $recordSection.removeClass('granted prompt denied')
+            .addClass(state);
+        setRecordingState(false);
+        debug('Microphone permission', microphonePerm);
+    };
+
+    const setRecordingState = (state) => {
+        recording = !!state;
+        $recordSection.toggleClass('recording', recording);
+        $('.pulse', $recordBtn).toggleClass('pulsing', recording);
+        debug('Recording state', recording)
     };
 
     $settingsDlg.on('show.bs.modal', () => {
-        $('label[for="buzzer-sound-file-input"]', $settingsDlg).text(buzzer && buzzer.name || 'Choose file');
+        newBuzzer = null;
+        buzzerChanged = false;
+        setBuzzerInputs(buzzer);
         $enableBgImage.prop('checked', opts.background);
         $rotateBgImage.prop('checked', opts.rotateBg);
         $enableSound.prop('checked', opts.sound);
@@ -539,24 +583,107 @@
     $buzzerFileInput.on('change', async () => {
         const file = $buzzerFileInput[0].files[0];
         if (file) {
-            $('label[for="buzzer-sound-file-input"]', $settingsDlg).text(file.name);
-
             const result = await toBase64(file).catch(e => Error(e));
             if (result instanceof Error) {
                 log('Buzzer input file error: ', result.message);
                 return;
             }
-            buzzer = {
+            newBuzzer = {
                 name: file.name,
                 src: result
             };
-            buzzerChanged = true;
-            debug('Buzzer input file', buzzer);
+        } else {
+            newBuzzer = null;
+        }
+        buzzerChanged = true;
+        setBuzzerInputs(newBuzzer);
+
+        debug('Buzzer input file changed', newBuzzer);
+    });
+
+    $buzzerResetBtn.on('click', () => {
+        debug('Reset buzzer file input');
+        $buzzerFileInput.val('').change();
+    });
+
+    $recordBtn.on('click', () => {
+        if (!recording) {
+            debug('Recording initiated');
+
+            setRecordingState(true);
+
+            navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: false
+                })
+                .then(function (stream) {
+                    debug('Microphone initialized');
+
+                    const options = {
+                        mimeType: 'audio/webm'
+                    };
+                    const recordedChunks = [];
+                    const mediaRecorder = new MediaRecorder(stream, options);
+
+                    mediaRecorder.addEventListener('dataavailable', function (e) {
+                        debug('mediaRecorder dataavailable');
+                        if (e.data.size > 0) {
+                            recordedChunks.push(e.data);
+                        }
+
+                        if (!recording && mediaRecorder.state !== 'inactive') {
+                            mediaRecorder.stop();
+                        }
+                    });
+
+                    mediaRecorder.addEventListener('stop', async () => {
+                        debug('Recording stopped');
+                        sounds.play(sounds.$end);
+                        $recordSection.removeClass('started');
+
+                        if (recordedChunks.length) {
+                            const result = await toBase64(new Blob(recordedChunks, {
+                                type: options.mimeType
+                            })).catch(e => Error(e));
+                            if (result instanceof Error) {
+                                log('Recording error: ', result.message);
+                                return;
+                            }
+                            newBuzzer = {
+                                name: 'Custom Recording',
+                                src: result
+                            };
+                            buzzerChanged = true;
+                            setBuzzerInputs(newBuzzer);
+                            debug('Custom recording for buzzer');
+                        }
+                    });
+
+                    mediaRecorder.addEventListener('start', async () => {
+                        debug('Recording started');
+                        $recordSection.addClass('started');
+                    });
+
+                    setTimeout(() => {
+                        if (recording) {
+                            debug('Recording timeout');
+                            setRecordingState(false);
+                        }
+                    }, 3000);
+                    mediaRecorder.start(500);
+                }, (e) => {
+                    // Generally permission is denied
+                    error(e);
+                });
+        } else {
+            debug('Recording manually stopped');
+            setRecordingState(false);
         }
     });
 
     $settingsSaveBtn.on('click', () => {
-        if (buzzerChanged && buzzer.name && buzzer.src) {
+        if (buzzerChanged) {
+            buzzer = newBuzzer;
             saveLocal('buzzer', buzzer);
             setBuzzerSound(buzzer);
             buzzerChanged = false;
@@ -580,6 +707,20 @@
 
         $settingsDlg.modal('hide');
     });
+
+    navigator.permissions.query({
+        name: 'microphone'
+    }).then(function (result) {
+        setRecordState(result.state);
+        result.onchange = function () {
+            setRecordState(this.state);
+        };
+    });
+
+    if (navigator && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        // Has recording feature
+        $recordSection.removeClass('d-none');
+    }
 
     /** Voice **/
     const utterance = 'speechSynthesis' in window ? new SpeechSynthesisUtterance() : null;
